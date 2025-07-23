@@ -1,0 +1,100 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test 1 Convert 6 to binary
+      id: test-1-convert-6-to-binary
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 1 Convert 6 to binary
+        setup-command: make
+        command: make test-6-to-binary
+        timeout: 5
+        max-score: 1
+    - name: Test 2 Convert 789 to binary
+      id: test-2-convert-789-to-binary
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 2 Convert 789 to binary
+        setup-command: make
+        command: make test-789-to-binary
+        timeout: 5
+        max-score: 1
+    - name: Test 3 Convert 10 to hex
+      id: test-3-convert-10-to-hex
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 3 Convert 10 to hex
+        setup-command: make
+        command: make test-10-to-hex
+        timeout: 5
+        max-score: 1
+    - name: Test 4 Convert 672 to hex
+      id: test-4-convert-672-to-hex
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 4 Convert 672 to hex
+        setup-command: make
+        command: make test-672-to-hex
+        timeout: 5
+        max-score: 1
+    - name: Test 5 Convert multiple binary numbers
+      id: test-5-convert-multiple-binary-numbers
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 5 Convert multiple binary numbers
+        setup-command: make
+        command: make test-multiple-binary
+        timeout: 5
+        max-score: 2
+    - name: Test 6 Convert multiple hex numbers
+      id: test-6-convert-multiple-hex-numbers
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 6 Convert multiple hex numbers
+        setup-command: make
+        command: make test-multiple-hex
+        timeout: 10
+        max-score: 2
+    - name: Test 7 Bad arguments
+      id: test-7-bad-arguments
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 7 Bad arguments
+        setup-command: make
+        command: make test-bad-args
+        timeout: 5
+        max-score: 1
+    - name: Test 8 Check style
+      id: test-8-check-style
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 8 Check style
+        setup-command: sudo pip3 install cpplint
+        command: cpplint convert.c
+        timeout: 5
+        max-score: 1
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-1-CONVERT-6-TO-BINARY_RESULTS: "${{steps.test-1-convert-6-to-binary.outputs.result}}"
+        TEST-2-CONVERT-789-TO-BINARY_RESULTS: "${{steps.test-2-convert-789-to-binary.outputs.result}}"
+        TEST-3-CONVERT-10-TO-HEX_RESULTS: "${{steps.test-3-convert-10-to-hex.outputs.result}}"
+        TEST-4-CONVERT-672-TO-HEX_RESULTS: "${{steps.test-4-convert-672-to-hex.outputs.result}}"
+        TEST-5-CONVERT-MULTIPLE-BINARY-NUMBERS_RESULTS: "${{steps.test-5-convert-multiple-binary-numbers.outputs.result}}"
+        TEST-6-CONVERT-MULTIPLE-HEX-NUMBERS_RESULTS: "${{steps.test-6-convert-multiple-hex-numbers.outputs.result}}"
+        TEST-7-BAD-ARGUMENTS_RESULTS: "${{steps.test-7-bad-arguments.outputs.result}}"
+        TEST-8-CHECK-STYLE_RESULTS: "${{steps.test-8-check-style.outputs.result}}"
+      with:
+        runners: test-1-convert-6-to-binary,test-2-convert-789-to-binary,test-3-convert-10-to-hex,test-4-convert-672-to-hex,test-5-convert-multiple-binary-numbers,test-6-convert-multiple-hex-numbers,test-7-bad-arguments,test-8-check-style

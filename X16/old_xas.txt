@@ -1,0 +1,258 @@
+
+    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+        clean_line(buffer);
+
+        if (strstr(buffer, "add")) {
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            p = strstr(p + 1, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            src1 = (reg_t)atoi(p + 2);
+
+            if (strstr(buffer, "$")) {
+                // add immediate
+                op1 = (uint16_t)atoi(strchr(buffer, '$') + 1);
+                instruction = emit_add_imm(dst, src1, op1);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else if (strstr(p+1, "%r")) {
+                // add register
+                p = strstr(p + 1, "%r");
+                if (!p || !isdigit(p[2])) return 2;
+                src2 = (reg_t)atoi(p + 2);
+                instruction = emit_add_reg(dst, src1, src2);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else {
+                fprintf(stderr, "Error parsing command: %s\n", buffer);
+                return 2;
+            }
+        } else if (strstr(buffer, "and")) {
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            p = strstr(p + 1, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            src1 = (reg_t)atoi(p + 2);
+
+            if (strstr(buffer, "$")) {
+                // and immediate
+                op1 = (uint16_t)atoi(strchr(buffer, '$') + 1);
+                instruction = emit_and_imm(dst, src1, op1);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else if (strstr(p+1, "%r")) {
+                // and register
+                p = strstr(p + 1, "%r");
+                if (!p || !isdigit(p[2])) return 2;
+                src2 = (reg_t)atoi(p + 2);
+                instruction = emit_and_reg(dst, src1, src2);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else {
+                fprintf(stderr, "Error parsing command: %s\n", buffer);
+                return 2;
+            }
+        } else if (strstr(buffer, "br")) {
+            bool P = false, Z = false, N = false;
+            if (strstr(buffer, "p")) {
+                P = true;
+            }
+            if (strstr(buffer, "n")) {
+                N = true;
+            }
+            if (strstr(buffer, "z")) {
+                Z = true;
+            }
+            // parse label to find memory address
+            word = get_last_word(buffer);
+            DictEntry *result = find_entry(word);
+            if (result) {
+                printf("%s\n", buffer);
+                printf("line no. = 0x%04x, instruction = 0x%.16b\n", result->line_number, instruction);
+                instruction = emit_br(N, Z, P, result->line_number);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else {
+                return 2;
+            }
+        } else if (strstr(buffer, "jmp")) {
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            instruction = emit_jmp(dst);
+            fwrite(&instruction, sizeof(instruction), 1, out);
+        } else if ((p = strstr(buffer, "jsr")) &&
+        (isspace(p[3]) || p[3] == '\0')) {
+            // parse label to find memory address
+            word = get_last_word(buffer);
+            DictEntry *result = find_entry(word);
+            if (result) {
+                printf("%s\n", buffer);
+                printf("line no. = 0x%04x, instruction = 0x%.16b\n", result->line_number, instruction);
+                instruction = emit_jsr(result->line_number);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else {
+                return 2;
+            }
+        } else if (strstr(buffer, "jsrr")) {
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            instruction = emit_jsrr(dst);
+            fwrite(&instruction, sizeof(instruction), 1, out);
+        } else if ((p = strstr(buffer, "ld")) &&
+        (isspace(p[3]) || p[3] == '\0')) {
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            // parse label to find memory address
+            word = get_last_word(buffer);
+            DictEntry *result = find_entry(word);
+            if (result) {
+                printf("%s\n", buffer);
+                printf("line no. = 0x%04x, instruction = 0x%.16b\n", result->line_number, instruction);
+                instruction = emit_ld(dst, result->line_number);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else {
+                return 2;
+            }
+        } else if (strstr(buffer, "ldi")) {
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            // parse label to find memory address
+            word = get_last_word(buffer);
+            DictEntry *result = find_entry(word);
+            if (result) {
+                printf("%s\n", buffer);
+                printf("line no. = 0x%04x, instruction = 0x%.16b\n", result->line_number, instruction);
+                instruction = emit_ldi(dst, result->line_number);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else {
+                return 2;
+            }
+        } else if (strstr(buffer, "ldr")) {
+            // TODO
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            p = strstr(p + 1, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            src1 = (reg_t)atoi(p + 2);
+
+            if (strstr(buffer, "$")) {
+                // load immediate
+                op1 = (uint16_t)atoi(strchr(buffer, '$') + 1);
+                instruction = emit_ldr(dst, src1, op1);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else {
+                fprintf(stderr, "Error parsing command: %s\n", buffer);
+                return 2;
+            }
+        } else if (strstr(buffer, "lea")) {
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            // parse label to find memory address
+            word = get_last_word(buffer);
+            DictEntry *result = find_entry(word);
+            if (result) {
+                printf("%s\n", buffer);
+                printf("line no. = 0x%04x, instruction = 0x%.16b\n", result->line_number, instruction);
+                instruction = emit_lea(dst, result->line_number);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else {
+                return 2;
+            }
+        } else if (strstr(buffer, "not")) {
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            p = strstr(p + 1, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            src1 = (reg_t)atoi(p + 2);
+
+            instruction = emit_not(dst, src1);
+            fwrite(&instruction, sizeof(instruction), 1, out);
+        } else if ((p = strstr(buffer, "st "))) {
+            printf("ST");
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            // parse label to find memory address
+            word = get_last_word(buffer);
+            DictEntry *result = find_entry(word);
+            if (result) {
+                printf("%s\n", buffer);
+                printf("line no. = 0x%04x, instruction = 0x%.16b\n", result->line_number, instruction);
+                instruction = emit_st(dst, result->line_number);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else {
+                printf("The label %s does not exist.\n", word);
+                return 2;
+            }
+        } else if (strstr(buffer, "sti")) {
+            printf("STI");
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            // parse label to find memory address
+            word = get_last_word(buffer);
+            DictEntry *result = find_entry(word);
+            if (result) {
+                printf("%s\n", buffer);
+                printf("line no. = 0x%04x, instruction = 0x%.16b\n", result->line_number, instruction);
+                instruction = emit_sti(dst, result->line_number);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else {
+                printf("The label %s does not exist.\n", word);
+                return 2;
+            }
+        } else if (strstr(buffer, "str")) {
+            printf("STR");
+            p = strstr(buffer, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            dst = (reg_t)atoi(p + 2);
+
+            p = strstr(p + 1, "%r");
+            if (!p || !isdigit(p[2])) return 2;
+            src1 = (reg_t)atoi(p + 2);
+
+            if (strstr(buffer, "$")) {
+                // load immediate
+                op1 = (uint16_t)atoi(strchr(buffer, '$') + 1);
+                instruction = emit_str(dst, src1, op1);
+                fwrite(&instruction, sizeof(instruction), 1, out);
+            } else {
+                fprintf(stderr, "Error parsing command: %s\n", buffer);
+                return 2;
+            }
+        } else if (strstr(buffer, "getc")) {
+            instruction = emit_trap(TRAP_GETC);
+            fwrite(&instruction, sizeof(instruction), 1, out);
+        } else if (strstr(buffer, "putc")) {
+            instruction = emit_trap(TRAP_OUT);
+            fwrite(&instruction, sizeof(instruction), 1, out);
+        } else if (strstr(buffer, "puts")) {
+            instruction = emit_trap(TRAP_PUTS);
+            fwrite(&instruction, sizeof(instruction), 1, out);
+        } else if (strstr(buffer, "enter")) {
+            instruction = emit_trap(TRAP_IN);
+            fwrite(&instruction, sizeof(instruction), 1, out);
+        } else if (strstr(buffer, "putsp")) {
+            instruction = emit_trap(TRAP_PUTSP);
+            fwrite(&instruction, sizeof(instruction), 1, out);
+        } else if (strstr(buffer, "halt")) {
+            instruction = emit_trap(TRAP_HALT);
+            fwrite(&instruction, sizeof(instruction), 1, out);
+        }
+        printf("%s\n", buffer);
+    }

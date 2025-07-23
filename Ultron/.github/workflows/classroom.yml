@@ -1,0 +1,125 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test 1. Creating Ultron Computer
+      id: test-1-creating-ultron-computer
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 1. Creating Ultron Computer
+        setup-command: ''
+        command: make test-create
+        timeout: 5
+        max-score: 1
+    - name: Test 2. Loading Ultron program
+      id: test-2-loading-ultron-program
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 2. Loading Ultron program
+        setup-command: ''
+        command: make test-loading
+        timeout: 5
+        max-score: 1
+    - name: Test 3. Adding
+      id: test-3-adding
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 3. Adding
+        setup-command: ''
+        command: make test-adding
+        timeout: 5
+        max-score: 1
+    - name: Test 4. Subtracting
+      id: test-4-subtracting
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 4. Subtracting
+        setup-command: ''
+        command: make test-subtracting
+        timeout: 5
+        max-score: 1
+    - name: Test 5. Branching
+      id: test-5-branching
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 5. Branching
+        setup-command: ''
+        command: make test-branching
+        timeout: 5
+        max-score: 1
+    - name: Test 6. Looping
+      id: test-6-looping
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 6. Looping
+        setup-command: ''
+        command: make test-looping
+        timeout: 5
+        max-score: 1
+    - name: Test 7. Counting Program
+      id: test-7-counting-program
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 7. Counting Program
+        setup-command: ''
+        command: make test-counting-program
+        timeout: 5
+        max-score: 2
+    - name: Test 8. count.u program
+      id: test-8-count-u-program
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test 8. count.u program
+        setup-command: make
+        command: "./ultron -f count.u"
+        input: '22'
+        expected-output: |-
+          = 21
+          = 20
+          = 19
+          = 18
+          = 17
+          = 16
+          = 15
+          = 14
+          = 13
+          = 12
+          = 11
+          = 10
+        comparison-method: contains
+        timeout: 5
+        max-score: 1
+    - name: Test 9. Check style
+      id: test-9-check-style
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 9. Check style
+        setup-command: sudo pip3 install cpplint
+        command: cpplint *.c *.h
+        timeout: 10
+        max-score: 1
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-1-CREATING-ULTRON-COMPUTER_RESULTS: "${{steps.test-1-creating-ultron-computer.outputs.result}}"
+        TEST-2-LOADING-ULTRON-PROGRAM_RESULTS: "${{steps.test-2-loading-ultron-program.outputs.result}}"
+        TEST-3-ADDING_RESULTS: "${{steps.test-3-adding.outputs.result}}"
+        TEST-4-SUBTRACTING_RESULTS: "${{steps.test-4-subtracting.outputs.result}}"
+        TEST-5-BRANCHING_RESULTS: "${{steps.test-5-branching.outputs.result}}"
+        TEST-6-LOOPING_RESULTS: "${{steps.test-6-looping.outputs.result}}"
+        TEST-7-COUNTING-PROGRAM_RESULTS: "${{steps.test-7-counting-program.outputs.result}}"
+        TEST-8-COUNT-U-PROGRAM_RESULTS: "${{steps.test-8-count-u-program.outputs.result}}"
+        TEST-9-CHECK-STYLE_RESULTS: "${{steps.test-9-check-style.outputs.result}}"
+      with:
+        runners: test-1-creating-ultron-computer,test-2-loading-ultron-program,test-3-adding,test-4-subtracting,test-5-branching,test-6-looping,test-7-counting-program,test-8-count-u-program,test-9-check-style

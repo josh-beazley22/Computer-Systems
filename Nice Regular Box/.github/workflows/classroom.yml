@@ -1,0 +1,70 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test 1. 3 lines, Hamlet
+      id: test-1-3-lines-hamlet
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 1. 3 lines, Hamlet
+        setup-command: ''
+        command: make test-1
+        timeout: 5
+        max-score: 2
+    - name: Test 2. 2 lines, Macbeth
+      id: test-2-2-lines-macbeth
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 2. 2 lines, Macbeth
+        setup-command: ''
+        command: make test-2
+        timeout: 5
+        max-score: 2
+    - name: Test 3. 1 line, Avengers
+      id: test-3-1-line-avengers
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 3. 1 line, Avengers
+        setup-command: ''
+        command: make test-3
+        timeout: 5
+        max-score: 2
+    - name: Test 4. 17 lines, King Richard
+      id: test-4-17-lines-king-richard
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 4. 17 lines, King Richard
+        setup-command: ''
+        command: make test-4
+        timeout: 5
+        max-score: 2
+    - name: Test 5. 0 lines
+      id: test-5-0-lines
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 5. 0 lines
+        setup-command: ''
+        command: make test-5
+        timeout: 5
+        max-score: 2
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-1-3-LINES-HAMLET_RESULTS: "${{steps.test-1-3-lines-hamlet.outputs.result}}"
+        TEST-2-2-LINES-MACBETH_RESULTS: "${{steps.test-2-2-lines-macbeth.outputs.result}}"
+        TEST-3-1-LINE-AVENGERS_RESULTS: "${{steps.test-3-1-line-avengers.outputs.result}}"
+        TEST-4-17-LINES-KING-RICHARD_RESULTS: "${{steps.test-4-17-lines-king-richard.outputs.result}}"
+        TEST-5-0-LINES_RESULTS: "${{steps.test-5-0-lines.outputs.result}}"
+      with:
+        runners: test-1-3-lines-hamlet,test-2-2-lines-macbeth,test-3-1-line-avengers,test-4-17-lines-king-richard,test-5-0-lines

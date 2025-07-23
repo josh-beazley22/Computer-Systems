@@ -1,0 +1,79 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test 1. Loading test1.c
+      id: test-1-loading-test1-c
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test 1. Loading test1.c
+        setup-command: ''
+        command: make test-test1
+        input: ''
+        expected-output: Answer=7
+        comparison-method: contains
+        timeout: 5
+        max-score: 2
+    - name: Test 2. Loading test2.c
+      id: test-2-loading-test2-c
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test 2. Loading test2.c
+        setup-command: ''
+        command: make test-test2
+        input: ''
+        expected-output: Answer=32
+        comparison-method: contains
+        timeout: 5
+        max-score: 2
+    - name: Test 3. Loading test3.c
+      id: test-3-loading-test3-c
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test 3. Loading test3.c
+        setup-command: ''
+        command: make test-test3
+        input: ''
+        expected-output: Answer=16
+        comparison-method: contains
+        timeout: 5
+        max-score: 2
+    - name: Test 4. Expect program header error with test4
+      id: test-4-expect-program-header-error-with-test4
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 4. Expect program header error with test4
+        setup-command: ''
+        command: make test-test4
+        timeout: 5
+        max-score: 2
+    - name: Test 5. ELF header error with test5
+      id: test-5-elf-header-error-with-test5
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 5. ELF header error with test5
+        setup-command: ''
+        command: make test-test5
+        timeout: 5
+        max-score: 2
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-1-LOADING-TEST1-C_RESULTS: "${{steps.test-1-loading-test1-c.outputs.result}}"
+        TEST-2-LOADING-TEST2-C_RESULTS: "${{steps.test-2-loading-test2-c.outputs.result}}"
+        TEST-3-LOADING-TEST3-C_RESULTS: "${{steps.test-3-loading-test3-c.outputs.result}}"
+        TEST-4-EXPECT-PROGRAM-HEADER-ERROR-WITH-TEST4_RESULTS: "${{steps.test-4-expect-program-header-error-with-test4.outputs.result}}"
+        TEST-5-ELF-HEADER-ERROR-WITH-TEST5_RESULTS: "${{steps.test-5-elf-header-error-with-test5.outputs.result}}"
+      with:
+        runners: test-1-loading-test1-c,test-2-loading-test2-c,test-3-loading-test3-c,test-4-expect-program-header-error-with-test4,test-5-elf-header-error-with-test5

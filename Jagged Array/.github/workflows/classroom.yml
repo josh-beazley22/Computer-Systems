@@ -1,0 +1,90 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test 1. Create jagged array
+      id: test-1-create-jagged-array
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 1. Create jagged array
+        setup-command: ''
+        command: make test-create
+        timeout: 5
+        max-score: 1
+    - name: Test 2. Add element
+      id: test-2-add-element
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 2. Add element
+        setup-command: ''
+        command: make test-add
+        timeout: 5
+        max-score: 1
+    - name: Test 3. Remove
+      id: test-3-remove
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 3. Remove
+        setup-command: ''
+        command: make test-remove
+        timeout: 5
+        max-score: 1
+    - name: Test 4. Pack
+      id: test-4-pack
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 4. Pack
+        setup-command: ''
+        command: make test-pack
+        timeout: 5
+        max-score: 2
+    - name: Test 5. Unpack
+      id: test-5-unpack
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 5. Unpack
+        setup-command: ''
+        command: make test-unpack
+        timeout: 5
+        max-score: 2
+    - name: Test 6. Memory leaks
+      id: test-6-memory-leaks
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 6. Memory leaks
+        setup-command: sudo apt install valgrind
+        command: make test-leak
+        timeout: 5
+        max-score: 2
+    - name: Test 7. Check style
+      id: test-7-check-style
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 7. Check style
+        setup-command: sudo pip3 install cpplint
+        command: cpplint *.c *.h
+        timeout: 5
+        max-score: 1
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-1-CREATE-JAGGED-ARRAY_RESULTS: "${{steps.test-1-create-jagged-array.outputs.result}}"
+        TEST-2-ADD-ELEMENT_RESULTS: "${{steps.test-2-add-element.outputs.result}}"
+        TEST-3-REMOVE_RESULTS: "${{steps.test-3-remove.outputs.result}}"
+        TEST-4-PACK_RESULTS: "${{steps.test-4-pack.outputs.result}}"
+        TEST-5-UNPACK_RESULTS: "${{steps.test-5-unpack.outputs.result}}"
+        TEST-6-MEMORY-LEAKS_RESULTS: "${{steps.test-6-memory-leaks.outputs.result}}"
+        TEST-7-CHECK-STYLE_RESULTS: "${{steps.test-7-check-style.outputs.result}}"
+      with:
+        runners: test-1-create-jagged-array,test-2-add-element,test-3-remove,test-4-pack,test-5-unpack,test-6-memory-leaks,test-7-check-style

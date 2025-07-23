@@ -1,0 +1,110 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test 1. Giza 1
+      id: test-1-giza-1
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 1. Giza 1
+        setup-command: ''
+        command: make test-giza-1
+        timeout: 5
+        max-score: 1
+    - name: Test 2. Giza 2
+      id: test-2-giza-2
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 2. Giza 2
+        setup-command: ''
+        command: make test-giza-2
+        timeout: 5
+        max-score: 1
+    - name: Test 3. Giza 5
+      id: test-3-giza-5
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 3. Giza 5
+        setup-command: ''
+        command: make test-giza-5
+        timeout: 5
+        max-score: 1
+    - name: Test 4. Giza 10
+      id: test-4-giza-10
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 4. Giza 10
+        setup-command: ''
+        command: make test-giza-10
+        timeout: 5
+        max-score: 1
+    - name: Test 5. Giza 21
+      id: test-5-giza-21
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 5. Giza 21
+        setup-command: ''
+        command: make test-giza-21
+        timeout: 5
+        max-score: 1
+    - name: Test 6. Wc with no words
+      id: test-6-wc-with-no-words
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 6. Wc with no words
+        setup-command: ''
+        command: make test-wc-empty
+        timeout: 5
+        max-score: 1
+    - name: Test 7. Wc with one single word
+      id: test-7-wc-with-one-single-word
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 7. Wc with one single word
+        setup-command: ''
+        command: make test-wc-one
+        timeout: 5
+        max-score: 1
+    - name: Test 8. Wc with spaces between words
+      id: test-8-wc-with-spaces-between-words
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 8. Wc with spaces between words
+        setup-command: ''
+        command: make test-wc-space
+        timeout: 5
+        max-score: 1
+    - name: Test 9. Wc with multiple words
+      id: test-9-wc-with-multiple-words
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 9. Wc with multiple words
+        setup-command: ''
+        command: make test-wc-multi
+        timeout: 5
+        max-score: 2
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-1-GIZA-1_RESULTS: "${{steps.test-1-giza-1.outputs.result}}"
+        TEST-2-GIZA-2_RESULTS: "${{steps.test-2-giza-2.outputs.result}}"
+        TEST-3-GIZA-5_RESULTS: "${{steps.test-3-giza-5.outputs.result}}"
+        TEST-4-GIZA-10_RESULTS: "${{steps.test-4-giza-10.outputs.result}}"
+        TEST-5-GIZA-21_RESULTS: "${{steps.test-5-giza-21.outputs.result}}"
+        TEST-6-WC-WITH-NO-WORDS_RESULTS: "${{steps.test-6-wc-with-no-words.outputs.result}}"
+        TEST-7-WC-WITH-ONE-SINGLE-WORD_RESULTS: "${{steps.test-7-wc-with-one-single-word.outputs.result}}"
+        TEST-8-WC-WITH-SPACES-BETWEEN-WORDS_RESULTS: "${{steps.test-8-wc-with-spaces-between-words.outputs.result}}"
+        TEST-9-WC-WITH-MULTIPLE-WORDS_RESULTS: "${{steps.test-9-wc-with-multiple-words.outputs.result}}"
+      with:
+        runners: test-1-giza-1,test-2-giza-2,test-3-giza-5,test-4-giza-10,test-5-giza-21,test-6-wc-with-no-words,test-7-wc-with-one-single-word,test-8-wc-with-spaces-between-words,test-9-wc-with-multiple-words

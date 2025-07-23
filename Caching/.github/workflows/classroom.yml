@@ -1,0 +1,119 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test 1. Cache and Store creation
+      id: test-1-cache-and-store-creation
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 1. Cache and Store creation
+        setup-command: ''
+        command: make test-create
+        timeout: 5
+        max-score: 1
+    - name: Test 2. FIFO policy
+      id: test-2-fifo-policy
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 2. FIFO policy
+        setup-command: ''
+        command: make test-fifo
+        timeout: 5
+        max-score: 1
+    - name: Test 3. LRU policy
+      id: test-3-lru-policy
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 3. LRU policy
+        setup-command: ''
+        command: make test-lru
+        timeout: 5
+        max-score: 2
+    - name: Test 4. MRU policy
+      id: test-4-mru-policy
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 4. MRU policy
+        setup-command: ''
+        command: make test-mru
+        timeout: 5
+        max-score: 1
+    - name: Test 5. FIFO simulation
+      id: test-5-fifo-simulation
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test 5. FIFO simulation
+        setup-command: make
+        command: "./cache_sim -p fifo < test/test_input.txt"
+        input: ''
+        expected-output: Total latency=66
+        comparison-method: contains
+        timeout: 5
+        max-score: 1
+    - name: Test 6. LRU simulation
+      id: test-6-lru-simulation
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test 6. LRU simulation
+        setup-command: make
+        command: "./cache_sim -p lru -s 20 -c 3 < test/test_input.txt"
+        input: ''
+        expected-output: Total latency=84
+        comparison-method: contains
+        timeout: 5
+        max-score: 1
+    - name: Test 7. MRU simulation
+      id: test-7-mru-simulation
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test 7. MRU simulation
+        setup-command: make
+        command: "./cache_sim -p mru -s 20 -c 3 < test/test_input.txt"
+        input: ''
+        expected-output: Total latency=66
+        comparison-method: contains
+        timeout: 5
+        max-score: 1
+    - name: Test 8. Check style
+      id: test-8-check-style
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 8. Check style
+        setup-command: sudo pip3 install cpplint
+        command: cpplint *.c *.h
+        timeout: 5
+        max-score: 1
+    - name: Test 9. Check for memory leaks
+      id: test-9-check-for-memory-leaks
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 9. Check for memory leaks
+        setup-command: sudo apt install valgrind
+        command: make test-memory
+        timeout: 5
+        max-score: 1
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-1-CACHE-AND-STORE-CREATION_RESULTS: "${{steps.test-1-cache-and-store-creation.outputs.result}}"
+        TEST-2-FIFO-POLICY_RESULTS: "${{steps.test-2-fifo-policy.outputs.result}}"
+        TEST-3-LRU-POLICY_RESULTS: "${{steps.test-3-lru-policy.outputs.result}}"
+        TEST-4-MRU-POLICY_RESULTS: "${{steps.test-4-mru-policy.outputs.result}}"
+        TEST-5-FIFO-SIMULATION_RESULTS: "${{steps.test-5-fifo-simulation.outputs.result}}"
+        TEST-6-LRU-SIMULATION_RESULTS: "${{steps.test-6-lru-simulation.outputs.result}}"
+        TEST-7-MRU-SIMULATION_RESULTS: "${{steps.test-7-mru-simulation.outputs.result}}"
+        TEST-8-CHECK-STYLE_RESULTS: "${{steps.test-8-check-style.outputs.result}}"
+        TEST-9-CHECK-FOR-MEMORY-LEAKS_RESULTS: "${{steps.test-9-check-for-memory-leaks.outputs.result}}"
+      with:
+        runners: test-1-cache-and-store-creation,test-2-fifo-policy,test-3-lru-policy,test-4-mru-policy,test-5-fifo-simulation,test-6-lru-simulation,test-7-mru-simulation,test-8-check-style,test-9-check-for-memory-leaks

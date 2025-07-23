@@ -1,0 +1,93 @@
+name: Autograding Tests
+'on':
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test 1. Test prompt
+      id: test-1-test-prompt
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test 1. Test prompt
+        setup-command: ''
+        command: make run
+        input: ''
+        expected-output: "$"
+        comparison-method: contains
+        timeout: 5
+        max-score: 1
+    - name: Test 2. Ls with no args
+      id: test-2-ls-with-no-args
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 2. Ls with no args
+        setup-command: ''
+        command: make test-ls-no-args
+        timeout: 5
+        max-score: 1
+    - name: Test 3. Ls with one arg
+      id: test-3-ls-with-one-arg
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 3. Ls with one arg
+        setup-command: ''
+        command: make test-ls-one-arg
+        timeout: 5
+        max-score: 2
+    - name: Test 4. Cd with one arg
+      id: test-4-cd-with-one-arg
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 4. Cd with one arg
+        setup-command: ''
+        command: make test-cd-one-arg
+        timeout: 5
+        max-score: 1
+    - name: Test 5. Cd with no args
+      id: test-5-cd-with-no-args
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 5. Cd with no args
+        setup-command: ''
+        command: make test-cd-no-args
+        timeout: 5
+        max-score: 1
+    - name: Test 6. last4 long
+      id: test-6-last4-long
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 6. last4 long
+        setup-command: ''
+        command: make test-last4-long
+        timeout: 5
+        max-score: 2
+    - name: Test 7. Last4 short
+      id: test-7-last4-short
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 7. Last4 short
+        setup-command: ''
+        command: make test-last4-short
+        timeout: 5
+        max-score: 2
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-1-TEST-PROMPT_RESULTS: "${{steps.test-1-test-prompt.outputs.result}}"
+        TEST-2-LS-WITH-NO-ARGS_RESULTS: "${{steps.test-2-ls-with-no-args.outputs.result}}"
+        TEST-3-LS-WITH-ONE-ARG_RESULTS: "${{steps.test-3-ls-with-one-arg.outputs.result}}"
+        TEST-4-CD-WITH-ONE-ARG_RESULTS: "${{steps.test-4-cd-with-one-arg.outputs.result}}"
+        TEST-5-CD-WITH-NO-ARGS_RESULTS: "${{steps.test-5-cd-with-no-args.outputs.result}}"
+        TEST-6-LAST4-LONG_RESULTS: "${{steps.test-6-last4-long.outputs.result}}"
+        TEST-7-LAST4-SHORT_RESULTS: "${{steps.test-7-last4-short.outputs.result}}"
+      with:
+        runners: test-1-test-prompt,test-2-ls-with-no-args,test-3-ls-with-one-arg,test-4-cd-with-one-arg,test-5-cd-with-no-args,test-6-last4-long,test-7-last4-short

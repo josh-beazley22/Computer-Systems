@@ -1,0 +1,60 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test 1. Oddinacci optimization
+      id: test-1-oddinacci-optimization
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 1. Oddinacci optimization
+        setup-command: ''
+        command: make test-odd
+        timeout: 7
+        max-score: 2
+    - name: Test 2. Matrix type 0 optimization
+      id: test-2-matrix-type-0-optimization
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 2. Matrix type 0 optimization
+        setup-command: ''
+        command: make test-mat0
+        timeout: 10
+        max-score: 2
+    - name: Test 3. Matrix type 1
+      id: test-3-matrix-type-1
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 3. Matrix type 1
+        setup-command: ''
+        command: make test-mat1
+        timeout: 10
+        max-score: 3
+    - name: Test 4. Matrix type 2
+      id: test-4-matrix-type-2
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test 4. Matrix type 2
+        setup-command: ''
+        command: make test-mat2
+        timeout: 10
+        max-score: 3
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-1-ODDINACCI-OPTIMIZATION_RESULTS: "${{steps.test-1-oddinacci-optimization.outputs.result}}"
+        TEST-2-MATRIX-TYPE-0-OPTIMIZATION_RESULTS: "${{steps.test-2-matrix-type-0-optimization.outputs.result}}"
+        TEST-3-MATRIX-TYPE-1_RESULTS: "${{steps.test-3-matrix-type-1.outputs.result}}"
+        TEST-4-MATRIX-TYPE-2_RESULTS: "${{steps.test-4-matrix-type-2.outputs.result}}"
+      with:
+        runners: test-1-oddinacci-optimization,test-2-matrix-type-0-optimization,test-3-matrix-type-1,test-4-matrix-type-2
